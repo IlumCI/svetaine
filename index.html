@@ -1,0 +1,130 @@
+<html>
+<head>
+    <title>MLbay - Machine Learning model pirate bay</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #7c7c7c;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            text-color: #fff;
+
+        }
+        nav {
+            background-color: #444;
+            color: #fff;
+            padding: 10px;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+        main {
+            padding: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MLbay - Machine Learning model pirate bay</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="home">
+            <h2>Home</h2>
+            <p>This is the home section of my web page.</p>
+        </section>
+        <section id="about">
+            <h2>About</h2>
+            <p>This section contains information about me.</p>
+        </section>
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>You can contact me at <a href="mailto:ilumbackup@gmail.com">ilumbackup@gmail.com</a>.</p>
+            <div class="hf-models">
+                <h3>Search Hugging Face Models</h3>
+                <form id="model-search-form">
+                    <label for="model-query">Search models:</label>
+                    <input type="search" id="model-query" name="model-query" placeholder="e.g. bert, whisper, llama" required>
+                    <button type="submit">Search</button>
+                </form>
+                <ul id="model-list"></ul>
+            </div>
+
+            <script>
+                const llmbay = {
+                    init() {
+                        const searchForm = document.getElementById('model-search-form');
+                        if (searchForm) {
+                            searchForm.addEventListener('submit', async (event) => {
+                                event.preventDefault();
+                                const queryInput = document.getElementById('model-query');
+                                const query = (queryInput ? queryInput.value.trim() : '').toLowerCase() || 'bert';
+                                await llmbay.loadModels(query);
+                            });
+                        }
+                    },
+                    async loadModels(searchTerm = 'bert') {
+                        const modelList = document.getElementById('model-list');
+                        if (!modelList) return;
+
+                        modelList.innerHTML = '<li>Searching Hugging Face...</li>';
+
+                        try {
+                            const response = await fetch(`https://huggingface.co/api/models?search=${encodeURIComponent(searchTerm)}&limit=5`);
+                            if (!response.ok) {
+                                throw new Error('Failed to load models');
+                            }
+
+                            const models = await response.json();
+                            if (!models.length) {
+                                modelList.innerHTML = '<li>No models found for this search.</li>';
+                                return;
+                            }
+
+                            modelList.innerHTML = models
+                                .map((model) => `
+                                    <li>
+                                        <strong>${model.id}</strong>
+                                        <span>${(model.pipeline_tag || 'text-generation').replace(/-/g, ' ')}</span>
+                                    </li>
+                                `)
+                                .join('');
+                        } catch (error) {
+                            modelList.innerHTML = '<li>Unable to load models from Hugging Face right now.</li>';
+                        }
+                    }
+                };
+
+                llmbay.init();
+                llmbay.loadModels();
+            </script>
+        </section>
+    </main>
+</body>
